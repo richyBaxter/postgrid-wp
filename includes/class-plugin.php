@@ -107,11 +107,6 @@ class Plugin {
 	 * Constructor - private to enforce singleton
 	 */
 	private function __construct() {
-		// Prevent creating multiple instances
-		if ( null !== self::$instance ) {
-			return self::$instance;
-		}
-		
 		// Initialize on the next tick to ensure WordPress is ready
 		add_action( 'init', array( $this, 'initialize' ), 0 );
 	}
@@ -300,10 +295,18 @@ class Plugin {
 	 * Register plugin settings
 	 */
 	public function register_settings() {
-		register_setting( 'postgrid_settings', 'postgrid_cache_expiration' );
-		register_setting( 'postgrid_settings', 'postgrid_enable_rest_api' );
-		register_setting( 'postgrid_settings', 'postgrid_supported_post_types' );
-		register_setting( 'postgrid_settings', 'postgrid_rate_limit' );
+		register_setting( 'postgrid_settings', 'postgrid_cache_expiration', array(
+			'sanitize_callback' => 'absint'
+		) );
+		register_setting( 'postgrid_settings', 'postgrid_enable_rest_api', array(
+			'sanitize_callback' => array( $this, 'sanitize_boolean' )
+		) );
+		register_setting( 'postgrid_settings', 'postgrid_supported_post_types', array(
+			'sanitize_callback' => array( $this, 'sanitize_post_types' )
+		) );
+		register_setting( 'postgrid_settings', 'postgrid_rate_limit', array(
+			'sanitize_callback' => array( $this, 'sanitize_rate_limit' )
+		) );
 	}
 	
 	/**
@@ -496,5 +499,50 @@ class Plugin {
 	 */
 	public function is_initialized() {
 		return $this->initialized && $this->components_loaded();
+	}
+	
+	/**
+	 * Sanitize boolean setting
+	 *
+	 * @param mixed $value
+	 * @return bool
+	 */
+	public function sanitize_boolean( $value ) {
+		return (bool) $value;
+	}
+	
+	/**
+	 * Sanitize post types setting
+	 *
+	 * @param mixed $value
+	 * @return array
+	 */
+	public function sanitize_post_types( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array( 'post' );
+		}
+		
+		$valid_post_types = get_post_types( array( 'public' => true ) );
+		$sanitized = array();
+		
+		foreach ( $value as $post_type ) {
+			$post_type = sanitize_key( $post_type );
+			if ( isset( $valid_post_types[ $post_type ] ) && $post_type !== 'attachment' ) {
+				$sanitized[] = $post_type;
+			}
+		}
+		
+		return empty( $sanitized ) ? array( 'post' ) : $sanitized;
+	}
+	
+	/**
+	 * Sanitize rate limit setting
+	 *
+	 * @param mixed $value
+	 * @return int
+	 */
+	public function sanitize_rate_limit( $value ) {
+		$value = absint( $value );
+		return max( 1, min( 1000, $value ) );
 	}
 }

@@ -52,6 +52,11 @@ class CacheManager {
 	 * @return bool
 	 */
 	public function set( $key, $data, $expiration = 0 ) {
+		// Validate expiration time to prevent overflow issues
+		if ( ! is_numeric( $expiration ) || $expiration < 0 ) {
+			$expiration = 0;
+		}
+		
 		// Set in object cache
 		wp_cache_set( $key, $data, $this->cache_group, $expiration );
 		
@@ -133,7 +138,7 @@ class CacheManager {
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
 	 */
 	public function add_admin_bar_menu( $wp_admin_bar ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 		
