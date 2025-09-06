@@ -165,12 +165,6 @@ class Plugin {
 			$blocks->register();
 		}
 		
-		// Initialize legacy support
-		$legacy = $this->get_service( 'legacy' );
-		if ( $legacy ) {
-			$legacy->init();
-		}
-		
 		// Register post type support
 		$this->register_post_type_support();
 		
@@ -253,7 +247,7 @@ class Plugin {
 		return $this->initialized && $this->initializer && $this->initializer->all_components_loaded();
 	}
 	
-	// Legacy getter methods for backward compatibility
+	// Getter methods for accessing services
 	
 	/**
 	 * Get cache manager instance
@@ -300,15 +294,7 @@ class Plugin {
 		return $this->get_service( 'assets' );
 	}
 	
-	/**
-	 * Get legacy support
-	 *
-	 * @return \PostGrid\Compatibility\LegacySupport|null
-	 */
-	public function get_legacy_support() {
-		return $this->get_service( 'legacy' );
-	}
-	
+
 	/**
 	 * Get settings service
 	 *
@@ -365,13 +351,5 @@ class Plugin {
 	public function assets() {
 		return $this->get_asset_manager();
 	}
-	
-	/**
-	 * Get legacy support
-	 * @deprecated Use get_legacy_support() instead
-	 * @return \PostGrid\Compatibility\LegacySupport|null
-	 */
-	public function legacy() {
-		return $this->get_legacy_support();
-	}
+
 }

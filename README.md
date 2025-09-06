@@ -26,8 +26,6 @@ includes/
 │   └── BlockRenderer.php      # Rendering logic
 ├── Api/
 │   └── RestController.php     # REST API endpoints
-└── Compatibility/
-    └── LegacySupport.php      # Caxton compatibility
 ```
 
 ### 2. Caching Strategy

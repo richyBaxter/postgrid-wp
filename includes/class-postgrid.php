@@ -35,14 +35,5 @@ class PostGrid {
 		$renderer = $plugin->blocks()->get_renderer();
 		return $renderer->render( $attributes );
 	}
-	
-	/**
-	 * Render Caxton block - wrapper method
-	 *
-	 * @param array $attributes Block attributes.
-	 * @return string
-	 */
-	public function render_caxton_block( $attributes ) {
-		return $this->render_block( $attributes );
-	}
+
 }

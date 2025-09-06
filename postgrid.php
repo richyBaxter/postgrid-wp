@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/richardbaxterseo/postgrid-wp
  * Description: A lightweight posts grid block for WordPress
  * Author: Richard Baxter
- * Version: 0.1.13
+ * Version: 0.1.14
  * Author URI: https://richardbaxter.co/
  * Text Domain: postgrid
  * Domain Path: /languages
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants
-define( 'POSTGRID_VERSION', '0.1.13' );
+define( 'POSTGRID_VERSION', '0.1.14' );
 define( 'POSTGRID_PLUGIN_FILE', __FILE__ );
 define( 'POSTGRID_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'POSTGRID_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

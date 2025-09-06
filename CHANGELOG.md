@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.14] - 2025-09-06
+
+### Removed
+- **BREAKING CHANGE**: Removed legacy Caxton compatibility layer entirely
+- Deleted `/includes/Compatibility/` directory and `LegacySupport` class
+- Removed support for legacy shortcodes: `caxton/posts`, `caxton/posts-grid`, `caxton/post-grid`, `caxton/grid`
+- Removed legacy block support for `caxton/posts-grid`
+- Cleaned up all references to Caxton compatibility from codebase
+- Simplified asset loading by removing legacy block detection
+
+### Improved
+- Cleaner, more focused architecture without legacy compatibility concerns
+- Reduced plugin size and complexity
+- Better first-time activation experience without legacy compatibility conflicts
+- Fixed PHP 8.4 compatibility issues caused by legacy compatibility layer
+
 ## [0.1.13] - 2025-07-10
 
 ### Changed
@@ -174,7 +190,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Asset loading conflicts with block.json
 - Cache invalidation on post updates
-- Legacy Caxton block compatibility issues
 - Memory leaks in long-running processes
 
 ### Security
@@ -192,4 +207,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - REST API endpoint
 - Minimal custom CSS (under 100 lines)
 - No external dependencies
-- Legacy Caxton block support

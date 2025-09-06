@@ -153,10 +153,7 @@ class ServiceContainer {
 			return new \PostGrid\Api\RestController();
 		});
 		
-		// Legacy Support
-		$this->register( 'legacy', function() {
-			return new \PostGrid\Compatibility\LegacySupport();
-		});
+
 		
 		// Plugin Settings Service
 		$this->register( 'settings', function() {

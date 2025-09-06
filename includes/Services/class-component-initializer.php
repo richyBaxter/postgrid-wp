@@ -56,7 +56,6 @@ class ComponentInitializer {
 			'assets',   // Initialize asset manager
 			'blocks',   // Initialize block registry
 			'api',      // Initialize REST API
-			'legacy',   // Initialize legacy support
 			'settings'  // Initialize settings last
 		);
 		

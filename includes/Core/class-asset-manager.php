@@ -173,8 +173,8 @@ class AssetManager {
 	 * @return bool
 	 */
 	private function has_postgrid_block() {
-		// Check for both PostGrid and legacy Caxton blocks
-		$blocks = array( 'postgrid/postgrid', 'caxton/posts-grid' );
+		// Check for PostGrid blocks
+		$blocks = array( 'postgrid/postgrid' );
 		
 		foreach ( $blocks as $block ) {
 			if ( has_block( $block ) ) {
@@ -200,7 +200,7 @@ class AssetManager {
 	 * @return bool
 	 */
 	private function has_postgrid_shortcode( $content ) {
-		$shortcodes = array( 'postgrid', 'caxton/posts', 'caxton/posts-grid', 'caxton/post-grid', 'caxton/grid' );
+		$shortcodes = array( 'postgrid' );
 		
 		foreach ( $shortcodes as $shortcode ) {
 			if ( has_shortcode( $content, $shortcode ) ) {
