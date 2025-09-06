@@ -44,9 +44,16 @@ class BlockRenderer {
 	 * @return string
 	 */
 	public function render( $attributes, $content = '', $block = null ) {
-		// Debug: Log raw attributes
+		// Debug: Log raw attributes (sanitized for security)
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( 'PostGrid - Raw attributes: ' . print_r( $attributes, true ) );
+			// Sanitize sensitive data before logging
+			$sanitized_attrs = array_map( function( $value ) {
+				if ( is_array( $value ) ) {
+					return '[Array: ' . count( $value ) . ' items]';
+				}
+				return is_string( $value ) ? substr( sanitize_text_field( $value ), 0, 100 ) : strval( $value );
+			}, $attributes );
+			error_log( 'PostGrid - Raw attributes: ' . wp_json_encode( $sanitized_attrs ) );
 		}
 		
 		// Ensure frontend styles are loaded
@@ -57,11 +64,17 @@ class BlockRenderer {
 		// Normalize attributes
 		$attributes = $this->normalize_attributes( $attributes );
 		
-		// Debug: Log normalized attributes
+		// Debug: Log normalized attributes (sanitized for security)
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( 'PostGrid - Normalized attributes: ' . print_r( $attributes, true ) );
-			error_log( 'PostGrid - showDate: ' . var_export( $attributes['showDate'], true ) );
-			error_log( 'PostGrid - showExcerpt: ' . var_export( $attributes['showExcerpt'], true ) );
+			$sanitized_attrs = array_map( function( $value ) {
+				if ( is_array( $value ) ) {
+					return '[Array: ' . count( $value ) . ' items]';
+				}
+				return is_string( $value ) ? substr( sanitize_text_field( $value ), 0, 100 ) : strval( $value );
+			}, $attributes );
+			error_log( 'PostGrid - Normalized attributes: ' . wp_json_encode( $sanitized_attrs ) );
+			error_log( 'PostGrid - showDate: ' . ( $attributes['showDate'] ? 'true' : 'false' ) );
+			error_log( 'PostGrid - showExcerpt: ' . ( $attributes['showExcerpt'] ? 'true' : 'false' ) );
 		}
 		
 		// Check cache first
@@ -111,6 +124,38 @@ class BlockRenderer {
 			'showCategories' => true,     // Show categories for visual interest
 		);
 		
+		// Sanitize and validate specific attributes
+		if ( isset( $attributes['postsPerPage'] ) ) {
+			$attributes['postsPerPage'] = max( 1, min( 100, absint( $attributes['postsPerPage'] ) ) );
+		}
+		
+		if ( isset( $attributes['orderBy'] ) ) {
+			$allowed_orderby = array( 'date', 'title', 'menu_order', 'rand', 'comment_count', 'modified' );
+			$attributes['orderBy'] = in_array( $attributes['orderBy'], $allowed_orderby, true ) ? $attributes['orderBy'] : 'date';
+		}
+		
+		if ( isset( $attributes['order'] ) ) {
+			$attributes['order'] = strtoupper( $attributes['order'] ) === 'ASC' ? 'ASC' : 'DESC';
+		}
+		
+		if ( isset( $attributes['columns'] ) ) {
+			$attributes['columns'] = max( 1, min( 6, absint( $attributes['columns'] ) ) );
+		}
+		
+		if ( isset( $attributes['selectedCategory'] ) ) {
+			$attributes['selectedCategory'] = absint( $attributes['selectedCategory'] );
+		}
+		
+		if ( isset( $attributes['excerptLength'] ) ) {
+			$attributes['excerptLength'] = max( 5, min( 100, absint( $attributes['excerptLength'] ) ) );
+		}
+		
+		if ( isset( $attributes['thumbnailSize'] ) ) {
+			$allowed_sizes = get_intermediate_image_sizes();
+			$allowed_sizes[] = 'full';
+			$attributes['thumbnailSize'] = in_array( $attributes['thumbnailSize'], $allowed_sizes, true ) ? $attributes['thumbnailSize'] : 'medium_large';
+		}
+		
 		// Handle boolean values explicitly
 		$boolean_attrs = array('showDate', 'showExcerpt', 'showThumbnail', 'showAuthor', 'showCategories');
 		
@@ -139,9 +184,12 @@ class BlockRenderer {
 			'post_type' => $this->get_allowed_post_type( $attributes['postType'] ),
 		);
 		
-		// Category filter
+		// Category filter with proper validation
 		if ( ! empty( $attributes['selectedCategory'] ) ) {
-			$args['cat'] = absint( $attributes['selectedCategory'] );
+			$category_id = absint( $attributes['selectedCategory'] );
+			if ( $category_id > 0 && term_exists( $category_id, 'category' ) ) {
+				$args['cat'] = $category_id;
+			}
 		}
 		
 		// Apply filters
