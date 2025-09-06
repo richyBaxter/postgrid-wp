@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.15] - 2025-09-06
+
+### Changed
+- Remove all references to legacy Caxton functionality from documentation
+- Clean up GitHub release workflow to remove outdated Caxton migration references
+- Simplify README.md to focus purely on PostGrid functionality
+- Update composer.json and package.json with correct project information
+- Remove development artifacts (phpunit.xml, SECURITY-AUDIT-COMPLETE.md)
+- Plugin now presents clean, professional image without legacy compatibility noise
+
+### Improved
+- Cleaner documentation focused on PostGrid features
+- Professional GitHub release process without outdated references
+- Simplified project structure
+
 ## [0.1.14] - 2025-09-06
 
 ### Improved
