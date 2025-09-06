@@ -349,9 +349,12 @@ class LegacySupport {
 		global $wpdb;
 		
 		$count = $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$wpdb->posts} 
-			WHERE post_content LIKE '%wp:caxton/%' 
-			AND post_status IN ('publish', 'draft', 'pending', 'private')"
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} 
+				WHERE post_content LIKE %s 
+				AND post_status IN ('publish', 'draft', 'pending', 'private')",
+				'%wp:caxton/%'
+			)
 		);
 		
 		$has_legacy = $count > 0;
