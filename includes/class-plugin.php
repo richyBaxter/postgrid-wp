@@ -174,32 +174,61 @@ class Plugin {
 	 * Initialize plugin components
 	 */
 	private function init_components() {
+		$failed_components = array();
+		
 		try {
-			// Initialize core components
+			// Initialize core components with individual error tracking
 			$this->cache = new CacheManager();
-			$this->assets = new AssetManager();
-			$this->hooks = new HooksManager();
-			$this->blocks = new BlockRegistry();
-			$this->api = new RestController();
-			$this->legacy = new LegacySupport();
+			if ( ! $this->cache instanceof CacheManager ) {
+				$failed_components[] = 'cache';
+			}
 			
-			// Initialize cache hooks
-			$this->cache->init_hooks();
+			$this->assets = new AssetManager();
+			if ( ! $this->assets instanceof AssetManager ) {
+				$failed_components[] = 'assets';
+			}
+			
+			$this->hooks = new HooksManager();
+			if ( ! $this->hooks instanceof HooksManager ) {
+				$failed_components[] = 'hooks';
+			}
+			
+			$this->blocks = new BlockRegistry();
+			if ( ! $this->blocks instanceof BlockRegistry ) {
+				$failed_components[] = 'blocks';
+			}
+			
+			$this->api = new RestController();
+			if ( ! $this->api instanceof RestController ) {
+				$failed_components[] = 'api';
+			}
+			
+			$this->legacy = new LegacySupport();
+			if ( ! $this->legacy instanceof LegacySupport ) {
+				$failed_components[] = 'legacy';
+			}
+			
+			// Initialize cache hooks if cache component loaded successfully
+			if ( $this->cache instanceof CacheManager ) {
+				$this->cache->init_hooks();
+			}
+			
+			// Log any partial failures for debugging
+			if ( ! empty( $failed_components ) ) {
+				error_log( 'PostGrid: Failed to initialize components: ' . implode( ', ', $failed_components ) );
+			}
 			
 		} catch ( \Exception $e ) {
-			// Log the error
-			error_log( 'PostGrid: Failed to initialize components - ' . $e->getMessage() );
+			// Log the error with stack trace for better debugging
+			error_log( 'PostGrid: Failed to initialize components - ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() );
 			
 			// Show admin notice
 			add_action( 'admin_notices', array( $this, 'show_initialization_error' ), 10, 1 );
 			
-			// Set components to null to indicate failure
-			$this->cache = null;
-			$this->assets = null;
-			$this->hooks = null;
-			$this->blocks = null;
-			$this->api = null;
-			$this->legacy = null;
+			// Only set failed components to null, preserve working ones
+			foreach ( $failed_components as $component ) {
+				$this->{$component} = null;
+			}
 		}
 	}
 	
@@ -209,13 +238,37 @@ class Plugin {
 	 * @return bool
 	 */
 	private function components_loaded() {
-		return ( 
-			$this->cache instanceof CacheManager &&
-			$this->assets instanceof AssetManager &&
-			$this->hooks instanceof HooksManager &&
-			$this->blocks instanceof BlockRegistry &&
-			$this->api instanceof RestController &&
-			$this->legacy instanceof LegacySupport
+		$required_components = array(
+			'cache' => CacheManager::class,
+			'assets' => AssetManager::class,
+			'hooks' => HooksManager::class,
+			'blocks' => BlockRegistry::class,
+			'api' => RestController::class,
+			'legacy' => LegacySupport::class
+		);
+		
+		foreach ( $required_components as $property => $class_name ) {
+			if ( ! isset( $this->{$property} ) || ! $this->{$property} instanceof $class_name ) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Get component initialization status
+	 *
+	 * @return array Component status array
+	 */
+	public function get_component_status() {
+		return array(
+			'cache' => $this->cache instanceof CacheManager,
+			'assets' => $this->assets instanceof AssetManager,
+			'hooks' => $this->hooks instanceof HooksManager,
+			'blocks' => $this->blocks instanceof BlockRegistry,
+			'api' => $this->api instanceof RestController,
+			'legacy' => $this->legacy instanceof LegacySupport,
 		);
 	}
 	
@@ -452,7 +505,7 @@ class Plugin {
 	 *
 	 * @return HooksManager|null
 	 */
-	public function hooks() {
+	public function get_hooks_manager() {
 		return $this->hooks;
 	}
 	
@@ -461,7 +514,7 @@ class Plugin {
 	 *
 	 * @return BlockRegistry|null
 	 */
-	public function blocks() {
+	public function get_block_registry() {
 		return $this->blocks;
 	}
 	
@@ -470,7 +523,7 @@ class Plugin {
 	 *
 	 * @return RestController|null
 	 */
-	public function api() {
+	public function get_api_controller() {
 		return $this->api;
 	}
 	
@@ -479,7 +532,7 @@ class Plugin {
 	 *
 	 * @return AssetManager|null
 	 */
-	public function assets() {
+	public function get_asset_manager() {
 		return $this->assets;
 	}
 	
@@ -488,8 +541,55 @@ class Plugin {
 	 *
 	 * @return LegacySupport|null
 	 */
-	public function legacy() {
+	public function get_legacy_support() {
 		return $this->legacy;
+	}
+	
+	// Backward compatibility aliases (deprecated)
+	
+	/**
+	 * Get hooks manager
+	 * @deprecated Use get_hooks_manager() instead
+	 * @return HooksManager|null
+	 */
+	public function hooks() {
+		return $this->get_hooks_manager();
+	}
+	
+	/**
+	 * Get block registry
+	 * @deprecated Use get_block_registry() instead
+	 * @return BlockRegistry|null
+	 */
+	public function blocks() {
+		return $this->get_block_registry();
+	}
+	
+	/**
+	 * Get API controller
+	 * @deprecated Use get_api_controller() instead
+	 * @return RestController|null
+	 */
+	public function api() {
+		return $this->get_api_controller();
+	}
+	
+	/**
+	 * Get asset manager
+	 * @deprecated Use get_asset_manager() instead
+	 * @return AssetManager|null
+	 */
+	public function assets() {
+		return $this->get_asset_manager();
+	}
+	
+	/**
+	 * Get legacy support
+	 * @deprecated Use get_legacy_support() instead
+	 * @return LegacySupport|null
+	 */
+	public function legacy() {
+		return $this->get_legacy_support();
 	}
 	
 	/**
@@ -504,20 +604,43 @@ class Plugin {
 	/**
 	 * Sanitize boolean setting
 	 *
-	 * @param mixed $value
-	 * @return bool
+	 * @param mixed $value Input value to sanitize
+	 * @return bool Sanitized boolean value
 	 */
 	public function sanitize_boolean( $value ) {
+		// Handle various input types that should be considered "true"
+		if ( is_string( $value ) ) {
+			$value = strtolower( trim( $value ) );
+			return in_array( $value, array( '1', 'true', 'yes', 'on' ), true );
+		}
+		
+		// For arrays, objects, and other non-scalar types, return false
+		if ( ! is_scalar( $value ) ) {
+			return false;
+		}
+		
 		return (bool) $value;
 	}
 	
 	/**
 	 * Sanitize post types setting
 	 *
-	 * @param mixed $value
-	 * @return array
+	 * @param mixed $value Input value to sanitize
+	 * @return array Array of valid post type names
 	 */
 	public function sanitize_post_types( $value ) {
+		// Ensure input is either scalar or array - reject other types
+		if ( ! is_scalar( $value ) && ! is_array( $value ) ) {
+			error_log( 'PostGrid: Invalid input type for sanitize_post_types: ' . gettype( $value ) );
+			return array( 'post' );
+		}
+		
+		// Convert scalar to array for consistent processing
+		if ( is_scalar( $value ) ) {
+			$value = array( $value );
+		}
+		
+		// Ensure we have an array at this point
 		if ( ! is_array( $value ) ) {
 			return array( 'post' );
 		}
@@ -526,23 +649,39 @@ class Plugin {
 		$sanitized = array();
 		
 		foreach ( $value as $post_type ) {
-			$post_type = sanitize_key( $post_type );
+			// Skip non-string values
+			if ( ! is_string( $post_type ) && ! is_numeric( $post_type ) ) {
+				continue;
+			}
+			
+			$post_type = sanitize_key( (string) $post_type );
+			
+			// Only include valid, public post types (excluding attachments)
 			if ( isset( $valid_post_types[ $post_type ] ) && $post_type !== 'attachment' ) {
 				$sanitized[] = $post_type;
 			}
 		}
 		
+		// Always return at least 'post' as a fallback
 		return empty( $sanitized ) ? array( 'post' ) : $sanitized;
 	}
 	
 	/**
 	 * Sanitize rate limit setting
 	 *
-	 * @param mixed $value
-	 * @return int
+	 * @param mixed $value Input value to sanitize
+	 * @return int Valid rate limit between 1 and 1000
 	 */
 	public function sanitize_rate_limit( $value ) {
+		// Ensure input is numeric or can be converted to numeric
+		if ( ! is_numeric( $value ) ) {
+			error_log( 'PostGrid: Invalid input type for rate limit: ' . gettype( $value ) );
+			return 60; // Default rate limit
+		}
+		
 		$value = absint( $value );
+		
+		// Ensure value is within acceptable range
 		return max( 1, min( 1000, $value ) );
 	}
 }
