@@ -7,7 +7,7 @@ A lightweight, performant, and extensible posts grid block for WordPress, built 
 - **Modern Architecture**: Clean separation of concerns with PSR-4 autoloading
 - **Performance Optimized**: Built-in caching, lazy loading, and optimized queries
 - **Developer Friendly**: Extensive hooks and filters for customization
-- **Backward Compatible**: Full support for legacy Caxton blocks and shortcodes
+- **Modern WordPress**: Built specifically for the block editor
 - **Security First**: Proper data sanitization, escaping, and permission checks
 - **REST API**: Complete REST API with rate limiting
 - **No Dependencies**: No jQuery or external CSS frameworks

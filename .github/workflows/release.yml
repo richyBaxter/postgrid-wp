@@ -75,13 +75,14 @@ jobs:
           3. Select the downloaded ZIP file
           4. Activate the plugin
           
-          ### Changelog
+          ### What's New
           
           See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
           
-          ### Migration from Caxton
+          ### Requirements
           
-          PostGrid includes full backwards compatibility with Caxton. See the [Migration Guide](https://github.com/${{ github.repository }}/blob/main/CAXTON_MIGRATION_GUIDE.md) for details.
+          - WordPress 6.0 or higher
+          - PHP 7.4 or higher
         draft: false
         prerelease: false
     

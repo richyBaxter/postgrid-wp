@@ -5,8 +5,8 @@
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "Your Name",
-            "email": "your-email@example.com"
+            "name": "Richard Baxter",
+            "email": "richard@richardbaxter.co"
         }
     ],
     "minimum-stability": "stable",
@@ -24,13 +24,7 @@
             "PostGrid\\": "includes/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "PostGrid\\Tests\\": "tests/"
-        }
-    },
     "scripts": {
-        "test": "phpunit",
         "phpcs": "phpcs",
         "phpcbf": "phpcbf"
     },
