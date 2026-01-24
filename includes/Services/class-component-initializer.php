@@ -188,13 +188,13 @@ class ComponentInitializer {
 	 * @return void
 	 */
 	private function log_initialization_results() {
-		$successful = count( $this->get_successful_components() );
 		$failed = count( $this->get_failed_components() );
-		$total = count( $this->initialization_results );
 		
-		if ( $failed === 0 ) {
-			error_log( 'PostGrid: All ' . $total . ' components initialized successfully' );
-		} else {
+		// Only log if there are failures - success is silent in production
+		if ( $failed > 0 ) {
+			$successful = count( $this->get_successful_components() );
+			$total = count( $this->initialization_results );
+			
 			error_log( 'PostGrid: ' . $successful . '/' . $total . ' components initialized (' . $failed . ' failed)' );
 			
 			// Log specific failures
